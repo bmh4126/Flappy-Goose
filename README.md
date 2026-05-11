@@ -99,11 +99,8 @@ Replace `<PROJECT_FILE_NAME>.fsproj` with the actual project file name.
 
 | Key | Action |
 | --- | --- |
-| `Space` | Flap upward during gameplay |
-| `Enter` | Start the game from the home screen |
-| `R` | Restart after game over |
-| `H` | Return to the home screen after game over |
-| `Esc` | Quit the game |
+| `Space` | Start game (Home), flap upward (Playing / Transition), restart (Game Over) |
+| `Esc` | Quit (Home), return to Home screen (Game Over) |
 
 The exact key bindings are displayed inside the game window.
 
@@ -279,8 +276,8 @@ This section explains how the implementation corresponds to the requirements doc
 | Game over | Collision or leaving the screen during normal play ends the game. |
 | High score | Final score is compared with the session high score. |
 | New high score | A special congratulation screen appears when the high score is beaten. |
-| Restart | The player can restart after game over. |
-| Home return | The player can return to the home screen after game over. |
+| Restart | The player presses `Space` on the result screen to restart. |
+| Home return | The player presses `Esc` on the result screen to return home. |
 
 ---
 

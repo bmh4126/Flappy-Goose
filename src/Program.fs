@@ -3,6 +3,7 @@ module FlappyGoose.Program
 
 open Raylib_cs
 open FlappyGoose.Constants
+open FlappyGoose.GameTypes
 open FlappyGoose.GameLogic
 open FlappyGoose.Rendering
 open FlappyGoose.Assets
@@ -11,19 +12,23 @@ open FlappyGoose.Assets
 let main _ =
     Raylib.InitWindow(screenWidth, screenHeight, "Flappy Goose")
     Raylib.SetTargetFPS(60)
+    // Disable default Esc-closes-window so we can handle Esc context-sensitively.
+    Raylib.SetExitKey(KeyboardKey.Null)
 
     let assets = load ()
     let mutable state = createInitialState ()
+    let mutable running = true
 
-    while not (Raylib.WindowShouldClose()) do
-        let dt = Raylib.GetFrameTime()
-
-        let enterPressed = Raylib.IsKeyPressed(KeyboardKey.Enter)
+    while running && not (Raylib.WindowShouldClose()) do
+        let dt           = Raylib.GetFrameTime()
         let spacePressed = Raylib.IsKeyPressed(KeyboardKey.Space)
-        let rPressed     = Raylib.IsKeyPressed(KeyboardKey.R)
-        let hPressed     = Raylib.IsKeyPressed(KeyboardKey.H)
+        let escPressed   = Raylib.IsKeyPressed(KeyboardKey.Escape)
 
-        state <- updateGame dt enterPressed spacePressed rPressed hPressed state
+        // Esc on Home screen quits the program; everywhere else it goes handled by updateGame.
+        if state.Screen = Home && escPressed then
+            running <- false
+        else
+            state <- updateGame dt spacePressed escPressed state
 
         draw state assets
 

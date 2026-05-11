@@ -18,6 +18,7 @@ type GameScreen =
     | Home
     | Playing
     | Transition
+    | Dying
     | GameOver
     | NewHighScore
 
@@ -26,6 +27,7 @@ type GameState = {
     Obstacles: Obstacle list
     Score: int
     HighScore: int
+    PreviousHighScore: int     // high score at the start of this run, for mid-game comparison
     Stage: int
     Gravity: float32
     Speed: float32
@@ -34,4 +36,7 @@ type GameState = {
     NextGravity: float32
     ObstaclesPassedInStage: int
     LastGapY: float32
+    FlapTimer: float32
+    DyingTimer: float32
+    ResultScreen: GameScreen   // GameOver or NewHighScore, resolved when dying starts
 }
