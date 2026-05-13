@@ -22,7 +22,15 @@ The player earns points by passing obstacles. When the goose collides with an ob
 
 ---
 
-## 2. Features
+## 2. Gameplay Showcase
+
+![Gameplay Screenshot](Assets/screenshot_high_score.png)
+
+**My current high score is 54. Try to beat me! :D**
+
+---
+
+## 4. Features
 
 - Graphical game window with resizable support and aspect ratio preservation
 - KAIST-themed goose character
@@ -55,7 +63,7 @@ This project was developed for the CS-20200 Programming Principles term project 
 
 ---
 
-## 4. How to Run
+## 5. How to Run
 
 Clone the repository:
 
@@ -97,7 +105,7 @@ dotnet run --project FlappyGoose.fsproj
 
 ---
 
-## 5. Controls
+## 6. Controls
 
 | Key | Action |
 | --- | --- |
@@ -116,9 +124,9 @@ The exact key bindings are displayed inside the game window.
 
 ---
 
-## 6. Game Screens
+## 7. Game Screens
 
-### 6.1 Home Screen
+### 7.1 Home Screen
 
 The home screen displays:
 
@@ -128,7 +136,7 @@ The home screen displays:
 
 Press the start key to begin a new game.
 
-### 6.2 Gameplay Screen
+### 7.2 Gameplay Screen
 
 During gameplay, the screen displays:
 
@@ -140,7 +148,7 @@ During gameplay, the screen displays:
 
 The player must guide the goose through the obstacle gaps.
 
-### 6.3 Transition Screen
+### 7.3 Transition Screen
 
 After the player passes all obstacles in a stage, the game enters a transition phase.
 
@@ -156,7 +164,7 @@ During this phase:
 
 After approximately 3 seconds (when all remaining obstacles have moved off-screen), the next stage begins with new obstacles generated using the selected gravity.
 
-### 6.4 Normal Game Over Screen
+### 7.4 Normal Game Over Screen
 
 If the final score is not greater than the current high score, the normal game-over screen displays:
 
@@ -165,7 +173,7 @@ If the final score is not greater than the current high score, the normal game-o
 - Restart instruction
 - Home-screen instruction
 
-### 6.5 New High Score Screen
+### 7.5 New High Score Screen
 
 If the final score is greater than the previous high score, a special game-over screen displays:
 
@@ -177,7 +185,7 @@ If the final score is greater than the previous high score, a special game-over 
 
 ---
 
-## 7. Gameplay Rules
+## 8. Gameplay Rules
 
 1. The goose starts on the left side of the screen.
 2. Gravity continuously pulls the goose downward.
@@ -197,7 +205,7 @@ If the final score is greater than the previous high score, a special game-over 
 
 ---
 
-## 8. High Score System
+## 9. High Score System
 
 The game tracks a high score during the current program session.
 
@@ -212,7 +220,7 @@ The high score is intentionally session-based. It is not required to persist aft
 
 ---
 
-## 9. Obstacle and Collision Design
+## 10. Obstacle and Collision Design
 
 The visible obstacle is a KAIST monument-inspired image.
 
@@ -227,7 +235,7 @@ This design keeps the gameplay readable and avoids unfair collisions with decora
 
 ---
 
-## 10. Random Gravity and Fairness
+## 11. Random Gravity and Fairness
 
 The game uses stage-based gravity variation to gradually increase difficulty:
 
@@ -259,7 +267,7 @@ This ensures gravity always changes meaningfully while staying within playable b
 
 ---
 
-## 11. Project Structure
+## 12. Project Structure
 
 A possible project structure is:
 
@@ -276,7 +284,8 @@ FlappyGoose/
 │   ├── goose_flap.png
 │   ├── monument_obstacle.png
 │   ├── lights_ring.png
-│   └── background.png
+│   ├── background.png
+│   └── screenshot_high_score.png
 └── Requirements.pdf
 ```
 
@@ -292,7 +301,7 @@ The actual file structure may differ, but all required source files and assets s
 
 ---
 
-## 12. Requirement Mapping
+## 13. Requirement Mapping
 
 This section explains how the implementation corresponds to the requirements document.
 
@@ -317,7 +326,7 @@ This section explains how the implementation corresponds to the requirements doc
 
 ---
 
-## 13. Development Notes
+## 14. Development Notes
 
 The game is intentionally designed to be small and focused.
 
@@ -338,7 +347,7 @@ The fullscreen feature has been removed due to macOS compatibility constraints. 
 
 ---
 
-## 14. Known Limitations
+## 15. Known Limitations
 
 - The high score is stored only during the current program session.
 - The game is designed for desktop execution.
@@ -347,7 +356,7 @@ The fullscreen feature has been removed due to macOS compatibility constraints. 
 
 ---
 
-## 15. Troubleshooting
+## 16. Troubleshooting
 
 ### `dotnet` command not found
 
@@ -385,7 +394,7 @@ Make sure the `Assets/` directory is present and included in the repository.
 
 ---
 
-## 16. LLM Usage
+## 17. LLM Usage
 
 Large language models were used during development of this project.
 
@@ -411,7 +420,7 @@ The main difficulty with LLM assistance was that visual design suggestions somet
 
 ---
 
-## 17. License and Asset Notice
+## 18. License and Asset Notice
 
 All source code and assets included in this repository are intended for this course project.
 
@@ -419,7 +428,7 @@ The game is inspired by the general mechanics of Flappy Bird, but uses original 
 
 ---
 
-## 18. Author
+## 19. Author
 
 Name: `Bui Minh Hieu`
 
