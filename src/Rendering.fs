@@ -77,7 +77,10 @@ let private drawGoose (g: Goose) (assets: Assets) (flapTimer: float32) (immortal
     let cy = g.Y + gooseHeight / 2.0f
     drawTexCenteredOutlined tex cx cy gooseWidth gooseHeight rotation gooseOutlineThickness
     if immortalOverlay then
-        drawTexTinted tex g.X g.Y gooseWidth gooseHeight yellowTint
+        let src    = Rectangle(0.0f, 0.0f, float32 tex.Width, float32 tex.Height)
+        let dst    = Rectangle(cx, cy, gooseWidth, gooseHeight)
+        let origin = Vector2(gooseWidth / 2.0f, gooseHeight / 2.0f)
+        Raylib.DrawTexturePro(tex, src, dst, origin, rotation, yellowTint)
 
 // ── Obstacles ────────────────────────────────────────────────────────────────
 
