@@ -30,7 +30,7 @@ The player earns points by passing obstacles. When the goose collides with an ob
 
 ---
 
-## 4. Features
+## 3. Features
 
 - Graphical game window with resizable support and aspect ratio preservation
 - KAIST-themed goose character
@@ -51,7 +51,7 @@ The player earns points by passing obstacles. When the goose collides with an ob
 
 ---
 
-## 3. Requirements
+## 4. Requirements
 
 This project requires:
 
@@ -60,6 +60,88 @@ This project requires:
 - A desktop environment capable of opening a graphical window
 
 This project was developed for the CS-20200 Programming Principles term project and is implemented in F# with .NET 10.
+
+---
+
+## 4.5. Installing .NET 10
+
+If you don't have .NET 10 installed, follow the instructions for your operating system:
+
+### Windows
+
+**Using Windows Package Manager (recommended):**
+
+```bash
+winget install Microsoft.DotNet.SDK.10
+```
+
+**Or manually from official website:**
+
+1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
+2. Download the Windows installer (x64 or x86)
+3. Run the installer and follow the on-screen instructions
+4. Verify installation:
+
+```bash
+dotnet --version
+```
+
+### macOS
+
+**Using Homebrew (recommended):**
+
+```bash
+brew install dotnet
+```
+
+If you don't have Homebrew, install it first:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**Or manually from official website:**
+
+1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
+2. Download the macOS installer (x64 or ARM64 for Apple Silicon)
+3. Run the installer and follow the on-screen instructions
+4. Verify installation:
+
+```bash
+dotnet --version
+```
+
+### Linux
+
+**Using package manager (Ubuntu/Debian):**
+
+```bash
+sudo apt update
+sudo apt install -y dotnet-sdk-10.0
+```
+
+**Using package manager (Fedora/RHEL):**
+
+```bash
+sudo dnf install -y dotnet-sdk-10.0
+```
+
+**Using package manager (Arch):**
+
+```bash
+sudo pacman -S dotnet-sdk
+```
+
+**Or manually from official website:**
+
+1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
+2. Download the Linux installer for your distribution
+3. Follow the provided instructions
+4. Verify installation:
+
+```bash
+dotnet --version
+```
 
 ---
 
