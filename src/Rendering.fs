@@ -6,20 +6,23 @@ open FlappyGoose.GameTypes
 open FlappyGoose.Constants
 open FlappyGoose.Assets
 
-let private yellow     = Color(255uy, 200uy, 0uy,  255uy)
+let private yellow     = Color(255uy, 235uy, 42uy,  255uy)
 let private red        = Color(200uy, 40uy,  40uy, 255uy)
 let private gold       = Color(255uy, 215uy, 0uy,  255uy)
 let private white      = Color.White
 let private black      = Color.Black
-let private yellowTint = Color(255uy, 220uy, 0uy,  140uy)   // semi-transparent yellow for immortal glow
+let private yellowTint = Color(255uy, 255uy, 100uy, 230uy)   // brighter yellow for immortal glow
 
 // ── Core outline primitive ───────────────────────────────────────────────────
 
 let private outlineOffsets (t: float32) : (float32 * float32) list =
-    [ (-t, 0f); (t, 0f); (0f, -t); (0f, t)
-      (-t, -t); (t, -t); (-t,  t); (t,  t) ]
+    let pi2 = System.MathF.PI * 2.0f
+    let directions = 16
+    [ for i in 0 .. directions - 1 do
+        let angle = float32 i * pi2 / float32 directions
+        yield (t * System.MathF.Cos(angle), t * System.MathF.Sin(angle)) ]
 
-// Draw a texture region (src) into dst with rotation; first renders 8 black outline copies, then the sprite.
+// Draw a texture region (src) into dst with rotation; first renders circular outline copies, then the sprite.
 let private drawProOutlined (tex: Texture2D) (src: Rectangle) (dst: Rectangle) (origin: Vector2) (rotation: float32) (thickness: float32) =
     for (dx, dy) in outlineOffsets thickness do
         let dstOff = Rectangle(dst.X + dx, dst.Y + dy, dst.Width, dst.Height)
@@ -68,9 +71,11 @@ let private drawBackground (assets: Assets) =
 
 // ── Goose ────────────────────────────────────────────────────────────────────
 
-let private drawGoose (g: Goose) (assets: Assets) (flapTimer: float32) (immortalOverlay: bool) =
+let private drawGoose (g: Goose) (assets: Assets) (flapTimer: float32) (immortalOverlay: bool) (rotation: float32) =
     let tex = if flapTimer > 0.0f then assets.GooseFlap else assets.Goose
-    drawTexOutlined tex g.X g.Y gooseWidth gooseHeight gooseOutlineThickness
+    let cx = g.X + gooseWidth / 2.0f
+    let cy = g.Y + gooseHeight / 2.0f
+    drawTexCenteredOutlined tex cx cy gooseWidth gooseHeight rotation gooseOutlineThickness
     if immortalOverlay then
         drawTexTinted tex g.X g.Y gooseWidth gooseHeight yellowTint
 
@@ -102,6 +107,22 @@ let private drawObstacle (o: Obstacle) (assets: Assets) =
 
     drawTexCenteredOutlined assets.LightsRing cx gapTop    ringW ringH   0.0f lightRingOutlineThickness
     drawTexCenteredOutlined assets.LightsRing cx gapBottom ringW ringH 180.0f lightRingOutlineThickness
+
+// ── Goose rotation ───────────────────────────────────────────────────────────
+
+let private calculateGooseRotation (velocity: float32) =
+    // Map velocity to rotation: -20° at upward velocity, 0° at balanced, +20° at downward
+    let maxVel = 400.0f
+    let maxRotation = 20.0f
+    let rotation = velocity / maxVel * maxRotation
+    if rotation < -maxRotation then -maxRotation elif rotation > maxRotation then maxRotation else rotation
+
+let private calculateDyingGooseRotation (velocity: float32) =
+    // Map velocity to rotation: +80° (pointing down) when falling during death animation
+    let maxVel = 300.0f
+    let maxRotation = 80.0f
+    let rotation = velocity / maxVel * maxRotation
+    if rotation < -maxRotation then -maxRotation elif rotation > maxRotation then maxRotation else rotation
 
 // ── Text helpers ─────────────────────────────────────────────────────────────
 
@@ -148,24 +169,36 @@ let drawHome (state: GameState) (assets: Assets) =
 let drawPlaying (state: GameState) (assets: Assets) =
     drawBackground assets
     List.iter (fun o -> drawObstacle o assets) state.Obstacles
-    drawGoose state.Goose assets state.FlapTimer false
+    let rotation = calculateGooseRotation state.Goose.Velocity
+    drawGoose state.Goose assets state.FlapTimer false rotation
     drawHud state
+    outlinedText "PRESS ESC TO PAUSE" (screenWidth - 250) (screenHeight - 50) 18 white
 
 let drawTransition (state: GameState) (assets: Assets) =
     drawBackground assets
     let showGlow =
         if state.TransitionTime > 1.0f then true
         else (int (state.TransitionTime / 0.2f)) % 2 = 0
-    drawGoose state.Goose assets state.FlapTimer showGlow
-    centeredText "GRAVITY SHIFT!"                                          (screenHeight / 2 - 90) 50 yellow
-    centeredText "The goose is immortal in this stage"                     (screenHeight / 2 - 30) 22 yellow
-    centeredText (sprintf "New gravity: %.0f" state.NextGravity)           (screenHeight / 2 + 12) 24 white
-    centeredText (sprintf "Stage %d in %.1f..." (state.Stage + 1) state.TransitionTime) (screenHeight / 2 + 50) 24 white
+    // Shift obstacles to the right by 80 pixels so goose is more visible
+    let shiftedObstacles = state.Obstacles |> List.map (fun o -> { o with X = o.X + 80.0f })
+    List.iter (fun o -> drawObstacle o assets) shiftedObstacles
+    let rotation = calculateGooseRotation state.Goose.Velocity
+    drawGoose state.Goose assets state.FlapTimer showGlow rotation
+    // Shift text to the right by 250 pixels for better goose visibility
+    let textOffsetX = 250
+    outlinedText "GRAVITY SHIFT!"                                          (textOffsetX) (screenHeight / 2 - 90) 50 yellow
+    outlinedText "THE GOOSE IS NOW IN IMMORTAL STATE"                      (textOffsetX) (screenHeight / 2 - 30) 22 yellow
+    outlinedText (sprintf "New gravity: %.0f" state.NextGravity)           (textOffsetX) (screenHeight / 2 + 12) 24 white
+    outlinedText (sprintf "Stage %d in %.1f..." (state.Stage + 1) state.TransitionTime) (textOffsetX) (screenHeight / 2 + 50) 24 white
+    outlinedText "PRESS ESC TO PAUSE" (screenWidth - 250) (screenHeight - 50) 18 white
 
 let drawDying (state: GameState) (assets: Assets) =
     drawBackground assets
     List.iter (fun o -> drawObstacle o assets) state.Obstacles
-    drawTexOutlined assets.Goose state.Goose.X state.Goose.Y gooseWidth gooseHeight gooseOutlineThickness
+    let rotation = calculateDyingGooseRotation state.Goose.Velocity
+    let cx = state.Goose.X + gooseWidth / 2.0f
+    let cy = state.Goose.Y + gooseHeight / 2.0f
+    drawTexCenteredOutlined assets.Goose cx cy gooseWidth gooseHeight rotation gooseOutlineThickness
 
 let drawGameOver (state: GameState) (assets: Assets) =
     drawBackground assets
@@ -182,13 +215,50 @@ let drawNewHighScore (state: GameState) (assets: Assets) =
     centeredText (sprintf "Best:  %d" state.HighScore)  (screenHeight / 2 + 55)  30 gold
     centeredText "SPACE - Restart   ESC - Home"         (screenHeight / 2 + 110) 26 white
 
+let drawPaused (state: GameState) (assets: Assets) =
+    let isBeatingRecord = state.Score > state.PreviousHighScore
+    Raylib.DrawRectangle(0, 0, screenWidth, screenHeight, Color(0uy, 0uy, 0uy, 200uy))
+    centeredText "PAUSED"                                       (screenHeight / 2 - 120) 56 yellow
+    if isBeatingRecord then
+        outlinedText (sprintf "Score: %d" state.Score) ((screenWidth - Raylib.MeasureText(sprintf "Score: %d" state.Score, 36)) / 2) (screenHeight / 2 - 30) 36 yellow
+        centeredText "NEW HIGH SCORE"                           (screenHeight / 2 + 10)  26 yellow
+    else
+        centeredText (sprintf "Score: %d" state.Score)         (screenHeight / 2 - 30) 36 white
+        centeredText (sprintf "Best:  %d" state.HighScore)     (screenHeight / 2 + 20) 30 white
+    centeredText "PRESS SPACE TO CONTINUE THE GAME"            (screenHeight / 2 + 80) 24 white
+    centeredText "PRESS ESC TO RETURN HOME"                    (screenHeight / 2 + 120) 20 white
+
+let drawUnpausingCountdown (state: GameState) (assets: Assets) =
+    let rotation = calculateGooseRotation state.Goose.Velocity
+    match state.ScreenBeforePause with
+    | Playing ->
+        drawBackground assets
+        List.iter (fun o -> drawObstacle o assets) state.Obstacles
+        drawGoose state.Goose assets state.FlapTimer false rotation
+        drawHud state
+    | Transition ->
+        drawBackground assets
+        let shiftedObstacles = state.Obstacles |> List.map (fun o -> { o with X = o.X + 80.0f })
+        List.iter (fun o -> drawObstacle o assets) shiftedObstacles
+        drawGoose state.Goose assets state.FlapTimer false rotation
+    | _ ->
+        drawBackground assets
+        drawGoose state.Goose assets state.FlapTimer false rotation
+
+    Raylib.DrawRectangle(0, 0, screenWidth, screenHeight, Color(0uy, 0uy, 0uy, 150uy))
+    let countdownNum = int (state.CountdownTime) + 1
+    if countdownNum > 0 && countdownNum <= 3 then
+        centeredText (sprintf "%d" countdownNum) (screenHeight / 2 - 30) 120 yellow
+    elif state.CountdownTime > 0.0f && state.CountdownTime <= 0.3f then
+        centeredText "GO!" (screenHeight / 2 - 40) 100 gold
+
 let draw (state: GameState) (assets: Assets) =
-    Raylib.BeginDrawing()
     match state.Screen with
-    | Home         -> drawHome state assets
-    | Playing      -> drawPlaying state assets
-    | Transition   -> drawTransition state assets
-    | Dying        -> drawDying state assets
-    | GameOver     -> drawGameOver state assets
-    | NewHighScore -> drawNewHighScore state assets
-    Raylib.EndDrawing()
+    | Home                -> drawHome state assets
+    | Playing             -> drawPlaying state assets
+    | Transition          -> drawTransition state assets
+    | Paused              -> drawPaused state assets
+    | UnpausingCountdown  -> drawUnpausingCountdown state assets
+    | Dying               -> drawDying state assets
+    | GameOver            -> drawGameOver state assets
+    | NewHighScore        -> drawNewHighScore state assets

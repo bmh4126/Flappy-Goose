@@ -18,6 +18,8 @@ type GameScreen =
     | Home
     | Playing
     | Transition
+    | Paused
+    | UnpausingCountdown
     | Dying
     | GameOver
     | NewHighScore
@@ -35,8 +37,12 @@ type GameState = {
     TransitionTime: float32
     NextGravity: float32
     ObstaclesPassedInStage: int
+    ObstaclesSpawnedInStage: int
     LastGapY: float32
     FlapTimer: float32
     DyingTimer: float32
     ResultScreen: GameScreen   // GameOver or NewHighScore, resolved when dying starts
+    WaitingForObstacleClear: bool
+    ScreenBeforePause: GameScreen  // which screen we were on before pausing
+    CountdownTime: float32  // countdown timer when resuming from pause
 }
