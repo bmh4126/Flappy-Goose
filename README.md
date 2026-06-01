@@ -32,22 +32,25 @@ The player earns points by passing obstacles. When the goose collides with an ob
 
 ## 3. Features
 
-- Graphical game window with resizable support and aspect ratio preservation
+- Graphical game window with an 800x600 virtual render pipeline
 - KAIST-themed goose character
 - KAIST monument-inspired obstacles
 - Space-to-flap control
 - Gravity-based movement
-- Stage-based gravity variation (increases by 10% per stage up to 80-90%)
-- Biased gap movement (gaps prefer opposite side from previous gap)
+- Stage-based bounded random gravity variation
+- Biased gap movement that tends to alternate screen halves
 - 3-second safe transition phase between stages
 - Score counter
 - Stage counter
 - Session high-score tracking
+- Mid-run high-score HUD feedback when the record is beaten
 - Special game-over screen for a new high score
 - Restart and return-to-home-screen flow
 - Pause feature with Esc key
+- Death animation before the result screen
 - 3-second countdown timer when resuming from pause
 - Progressive obstacle spacing that increases slower at higher speeds
+- Thick sprite and text outlines for readability
 
 ---
 
@@ -151,7 +154,7 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/bmh4126/Flappy-Goose.git
-cd FLAPPY-GOOSE
+cd Flappy-Goose
 ```
 
 Restore dependencies:
@@ -172,27 +175,14 @@ Run the game:
 dotnet run
 ```
 
-If the project uses a specific project folder, run:
-
-```bash
-cd src
-dotnet run
-```
-
-or:
-
-```bash
-dotnet run --project FlappyGoose.fsproj
-```
-
 ---
 
 ## 6. Controls
 
 | Key | Action |
 | --- | --- |
-| `Space` | Start game (Home), flap upward (Playing / Transition), continue game after countdown (Unpausing), restart (Game Over) |
-| `Esc` | Quit (Home), pause game (Playing / Transition), return to Home screen (Paused / Game Over) |
+| `Space` | Start game from Home, flap during Playing and Transition, resume from Pause, restart from result screens |
+| `Esc` | Quit from Home, pause during Playing or Transition, return to Home from Pause or result screens |
 
 **Pause Behavior:**
 - Press `Esc` during gameplay to pause
@@ -201,8 +191,6 @@ dotnet run --project FlappyGoose.fsproj
 - After the countdown ends, gameplay resumes
 
 The exact key bindings are displayed inside the game window.
-
----
 
 ---
 
@@ -236,15 +224,14 @@ After the player passes all obstacles in a stage, the game enters a transition p
 
 During this phase:
 
-- Existing obstacles continue to move and eventually leave the screen
-- No new obstacles spawn
+- No obstacles are on screen
 - The goose is immortal and cannot die
 - A gravity-shift message is displayed
 - The new gravity value for the next stage is displayed
 - A countdown timer is displayed
-- The next stage's gravity is selected based on the cumulative percentage range for that stage
+- The next stage's gravity is selected from a bounded random range tuned by stage
 
-After approximately 3 seconds (when all remaining obstacles have moved off-screen), the next stage begins with new obstacles generated using the selected gravity.
+Before this phase begins, the last obstacles from the previous stage are allowed to move fully off-screen. Once the transition starts, the screen is clear for approximately 3 seconds, then the next stage begins with new obstacles generated using the selected gravity.
 
 ### 7.4 Normal Game Over Screen
 
@@ -277,9 +264,9 @@ If the final score is greater than the previous high score, a special game-over 
 6. The player earns 1 point after successfully passing an obstacle.
 7. The player loses if the goose collides with an obstacle during normal gameplay.
 8. The player loses if the goose moves outside the top or bottom boundary during normal gameplay.
-9. After passing all obstacles in a stage (max 7 obstacles), the game enters a transition phase.
+9. Each stage contains 5 obstacles in stage 1, 6 in stage 2, and 7 from stage 3 onward.
 10. During transition, the goose cannot die.
-11. Obstacles remain active and move off-screen before the transition phase completes.
+11. After the last obstacle in a stage is passed, the remaining stage obstacles continue moving until they are fully off-screen, and only then does the transition phase begin.
 12. After transition, a new stage begins with a new gravity value.
 13. Gap positions are biased to alternate sides (gaps prefer opposite vertical half from previous gap).
 14. The high score is updated only when the final score is greater than the previous high score.
@@ -341,11 +328,12 @@ This ensures gravity always changes meaningfully while staying within playable b
 **Fair Obstacle Design:**
 - The obstacle gap is large enough for the goose to pass through
 - Gap positions are generated within safe vertical bounds (90 pixels from top/bottom)
-- Gap positions are biased to alternate between upper and lower screen halves, increasing switch probability by 10% per stage (40% at stage 1, up to 90% max)
+- The first obstacle of each stage uses the full legal gap range
+- Later obstacles are biased to alternate between upper and lower screen halves, with switch probability increasing by 10% per stage (40% at stage 1, up to 90% max)
 - Obstacle speed increases gradually as stages progress
 - Obstacle spacing increases with speed, but uses square-root scaling to prevent spacing from growing too quickly
 - The transition phase (3 seconds) gives the player time to adapt to new gravity before obstacles return
-- During transition, the goose is rendered in front of shifted obstacles with a bright yellow glow for better visibility
+- During transition, the goose is highlighted with a bright yellow glow for better visibility
 
 ---
 
@@ -356,11 +344,16 @@ A possible project structure is:
 ```text
 FlappyGoose/
 ├── README.md
+├── AGENTS.md
 ├── FlappyGoose.fsproj
-├── Program.fs
-├── GameTypes.fs
-├── GameLogic.fs
-├── Rendering.fs
+├── src/
+│   ├── Program.fs
+│   ├── GameTypes.fs
+│   ├── Constants.fs
+│   ├── Collision.fs
+│   ├── GameLogic.fs
+│   ├── Assets.fs
+│   └── Rendering.fs
 ├── Assets/
 │   ├── goose.png
 │   ├── goose_flap.png
@@ -368,7 +361,9 @@ FlappyGoose/
 │   ├── lights_ring.png
 │   ├── background.png
 │   └── screenshot_high_score.png
-└── Requirements.pdf
+└── docs/
+    ├── Requirements.pdf
+    └── requirements.md
 ```
 
 Possible file roles:
@@ -392,12 +387,12 @@ This section explains how the implementation corresponds to the requirements doc
 | Home screen | The game starts at a home screen showing the title and high score. |
 | Player control | The player presses `Space` to flap upward. |
 | Gravity | The goose is continuously pulled downward by gravity, with stage-based variation. |
-| Obstacles | KAIST monument obstacles move from right to left (max 7 per stage). |
+| Obstacles | KAIST monument obstacles move from right to left (5 in stage 1, 6 in stage 2, then 7 per stage). |
 | Collision | Two invisible rectangles are used for each obstacle. |
 | Scoring | Passing an obstacle increases the score by 1. |
-| Stage system | After all obstacles in a stage are passed (max 7), the game enters transition. |
-| Transition | Transition lasts approximately 3 seconds, obstacles move off-screen, and losing is disabled. |
-| Random gravity | Gravity varies by cumulative percentage ranges per stage (Stage 1: 0-10%, Stage 2: 10-20%, etc., up to 80-90%). |
+| Stage system | After all obstacles in a stage are passed, the stage waits for its last obstacles to clear, then enters transition. |
+| Transition | Transition lasts approximately 3 seconds, shows the next gravity, and disables losing. |
+| Random gravity | Gravity varies by bounded per-stage percentage ranges (0-10%, 10-25%, 20-40%, 30-55%, then 40-70% of the total range). |
 | Gap variation | Gap positions are biased to alternate between upper and lower halves. |
 | Game over | Collision or leaving the screen during normal play ends the game. |
 | High score | Final score is compared with the session high score. |
@@ -422,10 +417,10 @@ The main goal is not to build a large game engine, but to implement a clear, pla
 - pause functionality with resume countdown
 
 **Window Rendering:**
-The game uses a RenderTexture2D-based rendering pipeline that maintains a logical 800x600 game coordinate system while supporting arbitrary window sizes. The game is rendered to a virtual texture and then scaled to fit the window with black letterboxing to preserve aspect ratio.
+The game uses a RenderTexture2D-based rendering pipeline that maintains a logical 800x600 game coordinate system. The scene is rendered to a virtual texture and then drawn with aspect-ratio-preserving letterboxing.
 
 **Fullscreen Feature:**
-The fullscreen feature has been removed due to macOS compatibility constraints. The game window can be resized manually by the user while maintaining aspect ratio preservation.
+The fullscreen feature has been removed due to macOS compatibility constraints. The current build opens a fixed-size window, although the rendering path is structured so letterboxed scaling would still work if window resizing were enabled later.
 
 ---
 
@@ -434,7 +429,8 @@ The fullscreen feature has been removed due to macOS compatibility constraints. 
 - The high score is stored only during the current program session.
 - The game is designed for desktop execution.
 - Collision uses simplified rectangular hitboxes instead of exact pixel-perfect monument shapes.
-- Fullscreen mode is not available (window resizing is supported instead).
+- Fullscreen mode is not available.
+- The current build does not enable a resizable window.
 
 ---
 
@@ -476,7 +472,27 @@ Make sure the `Assets/` directory is present and included in the repository.
 
 ---
 
-## 17. LLM Usage
+## 17. Changes from Original Proposal
+
+The final implementation keeps the same core Flappy Goose idea from the proposal, but several details were refined during development for usability, balancing, and presentation. The table below highlights the main differences between the original proposal and the shipped version.
+
+| Area | Original proposal | Final implementation | Reason |
+| --- | --- | --- | --- |
+| Controls | `Enter` to start, `R` to restart, `H` to return home, `Esc` to quit | The game uses only `Space` and `Esc`: `Space` starts, flaps, resumes, and restarts; `Esc` quits from Home, pauses during play, and returns home from pause or result screens | Simplifies the control scheme and keeps the game playable with two keys |
+| Pause flow | No pause screen was described | Added a pause screen and a 3-second resume countdown | Improves usability without changing the core gameplay loop |
+| Window behavior | Proposal only required a graphical window | The game renders through a virtual 800x600 canvas with letterboxing logic, but the current build still opens a fixed-size window | Keeps rendering stable and leaves room for future resizing support |
+| Visual readability | Proposal focused on basic rendering | Added thick outlines for sprites and text, plus ring overlays on obstacle gap edges | Makes the goose, UI, and obstacle openings easier to read |
+| Transition visuals | Proposal required an immortal transition message and countdown | Transition also gives the goose a yellow immortal overlay and shows the exact next gravity value | Reinforces the temporary safe state and communicates the stage change clearly |
+| Stage size | Proposal suggested a fixed obstacle count per stage | Stage 1 has 5 obstacles, stage 2 has 6, and stage 3 onward has 7 | Adds progression while keeping stage length bounded |
+| Transition timing | Proposal said transition starts after all stage obstacles are passed and no obstacles appear during it | After the stage quota is passed, the remaining stage obstacles finish leaving the screen first; then the 3-second obstacle-free transition begins | Prevents abrupt obstacle disappearance while still honoring a clear transition phase |
+| Obstacle generation | Proposal suggested bounded random gaps and a max-shift style fairness rule | The first obstacle of each stage uses the full legal gap range, then later gaps are biased to alternate screen halves with stage-dependent switch probability; spacing also increases with speed | Produces readable variety and better pacing than purely local random shifts |
+| Gravity tuning | Proposal required safe bounded random gravity | Gravity is bounded to `600`-`3500` and changes by stage-based percentage bands of the total range | Keeps stage changes noticeable but still playable |
+| Death and result flow | Proposal moved directly from failure to game-over screens | Added a short falling death animation before showing `GameOver` or `NewHighScore` | Gives failure states a cleaner visual transition |
+| High-score HUD | Proposal required home and game-over high-score displays | During gameplay and pause, the HUD changes when the player beats the previous session best | Gives immediate feedback when a run becomes a new record |
+
+---
+
+## 18. LLM Usage
 
 Large language models were used during development of this project.
 
@@ -502,7 +518,7 @@ The main difficulty with LLM assistance was that visual design suggestions somet
 
 ---
 
-## 18. License and Asset Notice
+## 19. License and Asset Notice
 
 All source code and assets included in this repository are intended for this course project.
 
@@ -510,7 +526,7 @@ The game is inspired by the general mechanics of Flappy Bird, but uses original 
 
 ---
 
-## 19. Author
+## 20. Author
 
 Name: `Bui Minh Hieu`
 
