@@ -64,13 +64,11 @@ This project requires:
 
 This project was developed for the CS-20200 Programming Principles term project and is implemented in F# with .NET 10.
 
----
-
-## 4.5. Installing .NET 10
+### 4.1. Installing .NET 10
 
 If you don't have .NET 10 installed, follow the instructions for your operating system:
 
-### Windows
+#### Windows
 
 **Using Windows Package Manager (recommended):**
 
@@ -89,7 +87,7 @@ winget install Microsoft.DotNet.SDK.10
 dotnet --version
 ```
 
-### macOS
+#### macOS
 
 **Using Homebrew (recommended):**
 
@@ -114,7 +112,7 @@ If you don't have Homebrew, install it first:
 dotnet --version
 ```
 
-### Linux
+#### Linux
 
 **Using package manager (Ubuntu/Debian):**
 
