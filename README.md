@@ -1,6 +1,6 @@
 # Flappy Goose
 
-**Flappy Goose** is a KAIST-themed Flappy Bird-style game written in **F#** using **.NET 10**.
+**Flappy Goose** is a KAIST-themed Flappy Bird-style game written in **F#** using **.NET 10** and **Raylib-cs**.
 
 The player controls a goose flying near the KAIST goose pond. Instead of classic green pipes, the obstacles are inspired by the tall three-color KAIST monument. The game includes a stage system where gravity changes randomly between stages, forcing the player to adapt to a new flying behavior.
 
@@ -8,7 +8,7 @@ The player controls a goose flying near the KAIST goose pond. Instead of classic
 
 ## 1. Project Overview
 
-In Flappy Goose, the player presses a key to make the goose flap upward. Gravity pulls the goose downward. The goal is to fly through gaps in KAIST monument obstacles and survive for as long as possible.
+In Flappy Goose, the player presses `Space` to make the goose flap upward. Gravity pulls the goose downward. The goal is to fly through gaps in KAIST monument obstacles and survive for as long as possible.
 
 The game is divided into stages:
 
@@ -46,7 +46,7 @@ The player earns points by passing obstacles. When the goose collides with an ob
 - Mid-run high-score HUD feedback when the record is beaten
 - Special game-over screen for a new high score
 - Restart and return-to-home-screen flow
-- Pause feature with Esc key
+- Pause feature with `Esc`
 - Death animation before the result screen
 - 3-second countdown timer when resuming from pause
 - Progressive obstacle spacing that increases slower at higher speeds
@@ -54,59 +54,62 @@ The player earns points by passing obstacles. When the goose collides with an ob
 
 ---
 
-## 4. Requirements
+## 4. Installation and Run Instructions
+
+Follow this section to install dependencies and run the game from a fresh clone.
+
+### 4.1 Requirements
 
 This project requires:
 
-- .NET 10 SDK
-- F#
+- **.NET 10 SDK**
+- **F#**, included with the .NET SDK
+- **Raylib-cs** package dependencies restored through `dotnet restore`
 - A desktop environment capable of opening a graphical window
 
-This project was developed for the CS-20200 Programming Principles term project and is implemented in F# with .NET 10.
+This game opens a real graphical window. It should be run from a desktop session. If you are using SSH, a cloud VM, a headless server, or a terminal without a graphical display, the project may build successfully but fail to open a window.
 
-### 4.1. Installing .NET 10
-
-If you don't have .NET 10 installed, follow the instructions for your operating system:
-
-#### Windows
-
-**Using Windows Package Manager (recommended):**
+Check whether a display is available on Linux/macOS:
 
 ```bash
-winget install Microsoft.DotNet.SDK.10
+echo $DISPLAY
 ```
 
-**Or manually from official website:**
+If this prints nothing, run the game on a machine with a graphical desktop environment.
 
-1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
-2. Download the Windows installer (x64 or x86)
-3. Run the installer and follow the on-screen instructions
-4. Verify installation:
+### 4.2 Install .NET 10 SDK
+
+First check whether .NET is already installed:
 
 ```bash
 dotnet --version
 ```
 
+If the command is not found, install the **.NET 10 SDK** for your operating system.
+
+#### Windows
+
+Using Windows Package Manager:
+
+```powershell
+winget install Microsoft.DotNet.SDK.10
+```
+
+Then verify:
+
+```powershell
+dotnet --version
+```
+
 #### macOS
 
-**Using Homebrew (recommended):**
+Using Homebrew:
 
 ```bash
 brew install dotnet
 ```
 
-If you don't have Homebrew, install it first:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-**Or manually from official website:**
-
-1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
-2. Download the macOS installer (x64 or ARM64 for Apple Silicon)
-3. Run the installer and follow the on-screen instructions
-4. Verify installation:
+Then verify:
 
 ```bash
 dotnet --version
@@ -114,87 +117,193 @@ dotnet --version
 
 #### Linux
 
-**Using package manager (Ubuntu/Debian):**
+On Ubuntu/Debian:
 
 ```bash
 sudo apt update
 sudo apt install -y dotnet-sdk-10.0
 ```
 
-**Using package manager (Fedora/RHEL):**
+On Fedora/RHEL:
 
 ```bash
 sudo dnf install -y dotnet-sdk-10.0
 ```
 
-**Using package manager (Arch):**
+On Arch Linux:
 
 ```bash
 sudo pacman -S dotnet-sdk
 ```
 
-**Or manually from official website:**
-
-1. Visit https://dotnet.microsoft.com/download/dotnet/10.0
-2. Download the Linux installer for your distribution
-3. Follow the provided instructions
-4. Verify installation:
+Then verify:
 
 ```bash
 dotnet --version
 ```
 
----
+If the package is not available from your package manager, install the SDK from Microsoft's .NET download page.
 
-## 5. How to Run
-
-Clone the repository:
+### 4.3 Clone the Repository
 
 ```bash
 git clone https://github.com/bmh4126/Flappy-Goose.git
 cd Flappy-Goose
 ```
 
-Restore dependencies:
+### 4.4 Restore and Build
+
+For macOS and Windows:
 
 ```bash
 dotnet restore
-```
-
-Build the project:
-
-```bash
 dotnet build
 ```
 
-Run the game:
+For Linux, prefer restoring with a Linux runtime identifier so Raylib's native library is restored correctly:
+
+```bash
+dotnet restore -r linux-x64
+dotnet build
+```
+
+### 4.5 Run the Game
+
+#### macOS / Windows: normal run
 
 ```bash
 dotnet run
 ```
 
+#### macOS / Windows: runtime-specific run if needed
+
+If `dotnet run` fails with a missing Raylib native library error, run with your platform runtime identifier.
+
+Windows x64:
+
+```powershell
+dotnet restore -r win-x64
+dotnet run -r win-x64
+```
+
+macOS Apple Silicon:
+
+```bash
+dotnet restore -r osx-arm64
+dotnet run -r osx-arm64
+```
+
+macOS Intel:
+
+```bash
+dotnet restore -r osx-x64
+dotnet run -r osx-x64
+```
+
+#### Linux: recommended run
+
+```bash
+dotnet restore -r linux-x64
+dotnet run -r linux-x64
+```
+
+If this is a fresh Ubuntu/Debian machine, install common graphics/audio libraries:
+
+```bash
+sudo apt update
+sudo apt install -y libgl1 libx11-6 libxcursor1 libxrandr2 libxinerama1 libxi6
+sudo apt install -y libasound2t64 || sudo apt install -y libasound2
+```
+
+Then run again:
+
+```bash
+dotnet run -r linux-x64
+```
+
+### 4.6 Alternative: Publish and Run
+
+If `dotnet run` does not work, publish the game first.
+
+Linux x64:
+
+```bash
+dotnet publish -c Release -r linux-x64 --self-contained false
+./bin/Release/net10.0/linux-x64/publish/FlappyGoose
+```
+
+Windows x64:
+
+```powershell
+dotnet publish -c Release -r win-x64 --self-contained false
+.\bin\Release\net10.0\win-x64\publish\FlappyGoose.exe
+```
+
+macOS Apple Silicon:
+
+```bash
+dotnet publish -c Release -r osx-arm64 --self-contained false
+./bin/Release/net10.0/osx-arm64/publish/FlappyGoose
+```
+
+macOS Intel:
+
+```bash
+dotnet publish -c Release -r osx-x64 --self-contained false
+./bin/Release/net10.0/osx-x64/publish/FlappyGoose
+```
+
+If the executable name is different, list the publish folder and run the executable shown there:
+
+```bash
+ls bin/Release/net10.0/linux-x64/publish/
+```
+
+### 4.7 Native Raylib Library Note
+
+This project uses `Raylib-cs` for graphics. `Raylib-cs` is the .NET binding, but the native Raylib library must also be available at runtime.
+
+If you see an error like this:
+
+```text
+System.DllNotFoundException: Unable to load shared library 'raylib' or one of its dependencies
+libraylib.so: cannot open shared object file: No such file or directory
+```
+
+use a runtime-specific command:
+
+| Platform | Command |
+| --- | --- |
+| Windows x64 | `dotnet run -r win-x64` |
+| macOS Apple Silicon | `dotnet run -r osx-arm64` |
+| macOS Intel | `dotnet run -r osx-x64` |
+| Linux x64 | `dotnet run -r linux-x64` |
+
+For Linux, also install the common graphics/audio libraries listed in Section 4.5.
+
 ---
 
-## 6. Controls
+## 5. Controls
 
 | Key | Action |
 | --- | --- |
 | `Space` | Start game from Home, flap during Playing and Transition, resume from Pause, restart from result screens |
 | `Esc` | Quit from Home, pause during Playing or Transition, return to Home from Pause or result screens |
 
-**Pause Behavior:**
-- Press `Esc` during gameplay to pause
-- Press `Space` to resume with a 3-second countdown
-- The countdown displays the current game state so you can see where the goose is
-- After the countdown ends, gameplay resumes
+### Pause Behavior
 
-The exact key bindings are displayed inside the game window.
+- Press `Esc` during gameplay to pause.
+- Press `Space` to resume with a 3-second countdown.
+- Press `Esc` from the pause screen to return to the home screen.
+- The countdown displays the current game state so you can see where the goose is before continuing.
+
+The exact key bindings are also displayed inside the game window.
 
 ---
 
-## 7. Game Screens
+## 6. Game Screens
 
-### 7.1 Home Screen
+### 6.1 Home Screen
 
 The home screen displays:
 
@@ -202,9 +311,9 @@ The home screen displays:
 - Current high score
 - Instructions for starting the game
 
-Press the start key to begin a new game.
+Press `Space` to begin a new game.
 
-### 7.2 Gameplay Screen
+### 6.2 Gameplay Screen
 
 During gameplay, the screen displays:
 
@@ -213,10 +322,21 @@ During gameplay, the screen displays:
 - Current score
 - Current stage number
 - Background near the goose pond
+- `PRESS ESC TO PAUSE` instruction
 
 The player must guide the goose through the obstacle gaps.
 
-### 7.3 Transition Screen
+### 6.3 Pause Screen
+
+The pause screen displays:
+
+- Current score
+- Current high score, unless the player has already beaten it in the current run
+- `NEW HIGH SCORE` if the current run has beaten the previous high score
+- Instruction to press `Space` to continue
+- Instruction to press `Esc` to return home
+
+### 6.4 Transition Screen
 
 After the player passes all obstacles in a stage, the game enters a transition phase.
 
@@ -228,19 +348,21 @@ During this phase:
 - The new gravity value for the next stage is displayed
 - A countdown timer is displayed
 - The next stage's gravity is selected from a bounded random range tuned by stage
+- The goose is highlighted with a yellow immortal-state effect
 
 Before this phase begins, the last obstacles from the previous stage are allowed to move fully off-screen. Once the transition starts, the screen is clear for approximately 3 seconds, then the next stage begins with new obstacles generated using the selected gravity.
 
-### 7.4 Normal Game Over Screen
+### 6.5 Normal Game Over Screen
 
 If the final score is not greater than the current high score, the normal game-over screen displays:
 
 - Final score
 - Current high score
 - Restart instruction
-- Home-screen instruction
 
-### 7.5 New High Score Screen
+Press `Space` to restart or `Esc` to return home.
+
+### 6.6 New High Score Screen
 
 If the final score is greater than the previous high score, a special game-over screen displays:
 
@@ -248,11 +370,12 @@ If the final score is greater than the previous high score, a special game-over 
 - Final score
 - New high score
 - Restart instruction
-- Home-screen instruction
+
+Press `Space` to restart or `Esc` to return home.
 
 ---
 
-## 8. Gameplay Rules
+## 7. Gameplay Rules
 
 1. The goose starts on the left side of the screen.
 2. Gravity continuously pulls the goose downward.
@@ -266,13 +389,13 @@ If the final score is greater than the previous high score, a special game-over 
 10. During transition, the goose cannot die.
 11. After the last obstacle in a stage is passed, the remaining stage obstacles continue moving until they are fully off-screen, and only then does the transition phase begin.
 12. After transition, a new stage begins with a new gravity value.
-13. Gap positions are biased to alternate sides (gaps prefer opposite vertical half from previous gap).
+13. Gap positions are biased to alternate sides.
 14. The high score is updated only when the final score is greater than the previous high score.
 15. The game can be paused with `Esc` during Playing or Transition screens, with a 3-second countdown before resuming.
 
 ---
 
-## 9. High Score System
+## 8. High Score System
 
 The game tracks a high score during the current program session.
 
@@ -287,7 +410,7 @@ The high score is intentionally session-based. It is not required to persist aft
 
 ---
 
-## 10. Obstacle and Collision Design
+## 9. Obstacle and Collision Design
 
 The visible obstacle is a KAIST monument-inspired image.
 
@@ -302,42 +425,53 @@ This design keeps the gameplay readable and avoids unfair collisions with decora
 
 ---
 
-## 11. Random Gravity and Fairness
+## 10. Random Gravity and Fairness
 
-The game uses stage-based gravity variation to gradually increase difficulty:
+The game uses stage-based gravity variation to gradually increase difficulty.
 
-**Gravity Variation by Stage:**
-Gravity change is calculated as a percentage of the gravity range (max: 3500 - min: 600 = 2900):
-- Stage 1: Gravity changes by 0-10% of range (~0-290)
-- Stage 2: Gravity changes by 10-25% of range (~290-725)
-- Stage 3: Gravity changes by 20-40% of range (~580-1160)
-- Stage 4: Gravity changes by 30-55% of range (~870-1595)
-- Stage 5+: Gravity changes by 40-70% of range (~1160-2030)
+### 10.1 Gravity Variation by Stage
 
-**Gravity Selection Logic:**
-1. A random change amount is selected within the stage's range
-2. A direction (increase or decrease) is randomly chosen
-3. If the new gravity stays within bounds [600, 3500], it's accepted
-4. If it goes outside bounds, the opposite direction is tried
-5. If both directions overflow, the direction producing the larger absolute change from current gravity is chosen and then clamped
+Gravity change is calculated as a percentage of the gravity range.
 
-This ensures gravity always changes meaningfully while staying within playable bounds.
+The current game uses a bounded gravity range of:
 
-**Fair Obstacle Design:**
-- The obstacle gap is large enough for the goose to pass through
-- Gap positions are generated within safe vertical bounds (90 pixels from top/bottom)
-- The first obstacle of each stage uses the full legal gap range
-- Later obstacles are biased to alternate between upper and lower screen halves, with switch probability increasing by 10% per stage (40% at stage 1, up to 90% max)
-- Obstacle speed increases gradually as stages progress
-- Obstacle spacing increases with speed, but uses square-root scaling to prevent spacing from growing too quickly
-- The transition phase (3 seconds) gives the player time to adapt to new gravity before obstacles return
-- During transition, the goose is highlighted with a bright yellow glow for better visibility
+```text
+minimum gravity: 600
+maximum gravity: 3500
+```
+
+Stage behavior:
+
+- Stage 1: gravity changes by 0-10% of range
+- Stage 2: gravity changes by 10-25% of range
+- Stage 3: gravity changes by 20-40% of range
+- Stage 4: gravity changes by 30-55% of range
+- Stage 5+: gravity changes by 40-70% of range
+
+### 10.2 Gravity Selection Logic
+
+1. A random change amount is selected within the stage's range.
+2. A direction, increase or decrease, is randomly chosen.
+3. If the new gravity stays within bounds, it is accepted.
+4. If it goes outside bounds, the opposite direction is tried.
+5. If both directions overflow, the direction producing the larger absolute change from current gravity is chosen and then clamped.
+
+This ensures gravity changes meaningfully while staying within playable bounds.
+
+### 10.3 Fair Obstacle Design
+
+- The obstacle gap is large enough for the goose to pass through.
+- Gap positions are generated within safe vertical bounds.
+- The first obstacle of each stage uses the full legal gap range.
+- Later obstacles are biased to alternate between upper and lower screen halves.
+- Obstacle speed increases gradually as stages progress.
+- Obstacle spacing increases with speed.
+- The transition phase gives the player time to adapt to new gravity before obstacles return.
+- During transition, the goose is highlighted with a yellow glow for better visibility.
 
 ---
 
-## 12. Project Structure
-
-A possible project structure is:
+## 11. Project Structure
 
 ```text
 FlappyGoose/
@@ -364,33 +498,32 @@ FlappyGoose/
     └── requirements.md
 ```
 
-Possible file roles:
+File roles:
 
 - `Program.fs`: main game loop and application entry point
 - `GameTypes.fs`: game state, goose, obstacle, phase, and screen types
+- `Constants.fs`: screen size, gravity, speed, spacing, outline, and tuning constants
+- `Collision.fs`: rectangular collision logic
 - `GameLogic.fs`: physics, scoring, collision, stage transition, and high-score logic
+- `Assets.fs`: asset loading and unloading
 - `Rendering.fs`: drawing the goose, background, obstacles, UI text, and screens
 - `Assets/`: image files used by the game
 
-The actual file structure may differ, but all required source files and assets should be included in the repository.
-
 ---
 
-## 13. Requirement Mapping
-
-This section explains how the implementation corresponds to the requirements document.
+## 12. Requirement Mapping
 
 | Requirement Area | Implementation Behavior |
 | --- | --- |
 | Home screen | The game starts at a home screen showing the title and high score. |
 | Player control | The player presses `Space` to flap upward. |
 | Gravity | The goose is continuously pulled downward by gravity, with stage-based variation. |
-| Obstacles | KAIST monument obstacles move from right to left (5 in stage 1, 6 in stage 2, then 7 per stage). |
+| Obstacles | KAIST monument obstacles move from right to left. |
 | Collision | Two invisible rectangles are used for each obstacle. |
 | Scoring | Passing an obstacle increases the score by 1. |
 | Stage system | After all obstacles in a stage are passed, the stage waits for its last obstacles to clear, then enters transition. |
 | Transition | Transition lasts approximately 3 seconds, shows the next gravity, and disables losing. |
-| Random gravity | Gravity varies by bounded per-stage percentage ranges (0-10%, 10-25%, 20-40%, 30-55%, then 40-70% of the total range). |
+| Random gravity | Gravity varies by bounded per-stage percentage ranges. |
 | Gap variation | Gap positions are biased to alternate between upper and lower halves. |
 | Game over | Collision or leaving the screen during normal play ends the game. |
 | High score | Final score is compared with the session high score. |
@@ -401,7 +534,7 @@ This section explains how the implementation corresponds to the requirements doc
 
 ---
 
-## 14. Development Notes
+## 13. Development Notes
 
 The game is intentionally designed to be small and focused.
 
@@ -414,27 +547,30 @@ The main goal is not to build a large game engine, but to implement a clear, pla
 - score and high-score tracking
 - pause functionality with resume countdown
 
-**Window Rendering:**
-The game uses a RenderTexture2D-based rendering pipeline that maintains a logical 800x600 game coordinate system. The scene is rendered to a virtual texture and then drawn with aspect-ratio-preserving letterboxing.
+### 13.1 Window Rendering
 
-**Fullscreen Feature:**
-The fullscreen feature has been removed due to macOS compatibility constraints. The current build opens a fixed-size window, although the rendering path is structured so letterboxed scaling would still work if window resizing were enabled later.
+The game uses a `RenderTexture2D`-based rendering pipeline that maintains a logical 800x600 game coordinate system. The scene is rendered to a virtual texture and then drawn with aspect-ratio-preserving letterboxing.
+
+### 13.2 Fullscreen / Resizable Window
+
+Fullscreen mode is not available in the current build. The current build opens a fixed-size window. The rendering path is structured so letterboxed scaling could be enabled later if window resizing is reintroduced.
 
 ---
 
-## 15. Known Limitations
+## 14. Known Limitations
 
 - The high score is stored only during the current program session.
 - The game is designed for desktop execution.
 - Collision uses simplified rectangular hitboxes instead of exact pixel-perfect monument shapes.
 - Fullscreen mode is not available.
 - The current build does not enable a resizable window.
+- The game requires a graphical desktop session.
 
 ---
 
-## 16. Troubleshooting
+## 15. Troubleshooting
 
-### `dotnet` command not found
+### 15.1 `dotnet` command not found
 
 Install the .NET 10 SDK and make sure `dotnet` is available in your terminal path.
 
@@ -444,53 +580,150 @@ Check installation:
 dotnet --version
 ```
 
-### The project does not build
+### 15.2 The project does not build
 
 Try restoring dependencies:
 
 ```bash
 dotnet restore
-```
-
-Then rebuild:
-
-```bash
 dotnet build
 ```
 
-### The game window does not open
+On Linux, prefer:
+
+```bash
+dotnet restore -r linux-x64
+dotnet build
+```
+
+### 15.3 Linux error: `System.DllNotFoundException: Unable to load shared library 'raylib'`
+
+This game uses `Raylib-cs` for graphics. `Raylib-cs` is the .NET binding, but the native Raylib shared library must also be available at runtime.
+
+On some fresh Linux installations, plain `dotnet run` may fail with an error similar to:
+
+```text
+System.DllNotFoundException: Unable to load shared library 'raylib' or one of its dependencies
+libraylib.so: cannot open shared object file: No such file or directory
+```
+
+Use the Linux runtime identifier:
+
+```bash
+dotnet restore -r linux-x64
+dotnet run -r linux-x64
+```
+
+If it still fails, install common graphics/audio dependencies:
+
+```bash
+sudo apt update
+sudo apt install -y libgl1 libx11-6 libxcursor1 libxrandr2 libxinerama1 libxi6
+sudo apt install -y libasound2t64 || sudo apt install -y libasound2
+```
+
+Then run again:
+
+```bash
+dotnet run -r linux-x64
+```
+
+### 15.4 Missing Raylib native library on macOS or Windows
+
+This is less common than on Linux, but it can happen if the native Raylib library is not restored for the correct platform.
+
+Use the runtime identifier for your system:
+
+Windows x64:
+
+```powershell
+dotnet restore -r win-x64
+dotnet run -r win-x64
+```
+
+macOS Apple Silicon:
+
+```bash
+dotnet restore -r osx-arm64
+dotnet run -r osx-arm64
+```
+
+macOS Intel:
+
+```bash
+dotnet restore -r osx-x64
+dotnet run -r osx-x64
+```
+
+### 15.5 The game window does not open
 
 Make sure you are running the project on a desktop environment with graphical window support.
 
-If running through SSH or a headless server, the graphical window may not open.
+If running through SSH, a cloud VM, or a headless server, the graphical window may not open.
 
-### Assets are missing
+Check:
 
-Make sure the `Assets/` directory is present and included in the repository.
+```bash
+echo $DISPLAY
+```
+
+If this prints nothing, run the game on a machine with a graphical desktop environment.
+
+### 15.6 Assets are missing
+
+Make sure the `Assets/` directory is present and includes:
+
+```text
+goose.png
+goose_flap.png
+monument_obstacle.png
+lights_ring.png
+background.png
+screenshot_high_score.png
+```
+
+### 15.7 Clean rebuild
+
+If the build behaves strangely, run:
+
+```bash
+dotnet clean
+dotnet restore
+dotnet build
+```
+
+On Linux:
+
+```bash
+dotnet clean
+dotnet restore -r linux-x64
+dotnet build
+dotnet run -r linux-x64
+```
 
 ---
 
-## 17. Changes from Original Proposal
+## 16. Changes from Original Proposal
 
-The final implementation keeps the same core Flappy Goose idea from the proposal, but several details were refined during development for usability, balancing, and presentation. The table below highlights the main differences between the original proposal and the shipped version.
+The final implementation keeps the same core Flappy Goose idea from the proposal, but several details were refined during development for usability, balancing, and presentation.
 
 | Area | Original proposal | Final implementation | Reason |
 | --- | --- | --- | --- |
-| Controls | `Enter` to start, `R` to restart, `H` to return home, `Esc` to quit | The game uses only `Space` and `Esc`: `Space` starts, flaps, resumes, and restarts; `Esc` quits from Home, pauses during play, and returns home from pause or result screens | Simplifies the control scheme and keeps the game playable with two keys |
-| Pause flow | No pause screen was described | Added a pause screen and a 3-second resume countdown | Improves usability without changing the core gameplay loop |
-| Window behavior | Proposal only required a graphical window | The game renders through a virtual 800x600 canvas with letterboxing logic, but the current build still opens a fixed-size window | Keeps rendering stable and leaves room for future resizing support |
-| Visual readability | Proposal focused on basic rendering | Added thick outlines for sprites and text, plus ring overlays on obstacle gap edges | Makes the goose, UI, and obstacle openings easier to read |
-| Transition visuals | Proposal required an immortal transition message and countdown | Transition also gives the goose a yellow immortal overlay and shows the exact next gravity value | Reinforces the temporary safe state and communicates the stage change clearly |
-| Stage size | Proposal suggested a fixed obstacle count per stage | Stage 1 has 5 obstacles, stage 2 has 6, and stage 3 onward has 7 | Adds progression while keeping stage length bounded |
-| Transition timing | Proposal said transition starts after all stage obstacles are passed and no obstacles appear during it | After the stage quota is passed, the remaining stage obstacles finish leaving the screen first; then the 3-second obstacle-free transition begins | Prevents abrupt obstacle disappearance while still honoring a clear transition phase |
-| Obstacle generation | Proposal suggested bounded random gaps and a max-shift style fairness rule | The first obstacle of each stage uses the full legal gap range, then later gaps are biased to alternate screen halves with stage-dependent switch probability; spacing also increases with speed | Produces readable variety and better pacing than purely local random shifts |
-| Gravity tuning | Proposal required safe bounded random gravity | Gravity is bounded to `600`-`3500` and changes by stage-based percentage bands of the total range | Keeps stage changes noticeable but still playable |
-| Death and result flow | Proposal moved directly from failure to game-over screens | Added a short falling death animation before showing `GameOver` or `NewHighScore` | Gives failure states a cleaner visual transition |
-| High-score HUD | Proposal required home and game-over high-score displays | During gameplay and pause, the HUD changes when the player beats the previous session best | Gives immediate feedback when a run becomes a new record |
+| Controls | The proposal described a start key, Space to flap, and keys for restart/home behavior. | The game uses only `Space` and `Esc`: `Space` starts, flaps, resumes, and restarts; `Esc` quits from Home, pauses during play, and returns home from pause or result screens. | Simplifies the control scheme and keeps the game playable with two keys. |
+| Pause flow | No pause screen was described. | Added a pause screen and a 3-second resume countdown. | Improves usability without changing the core gameplay loop. |
+| Window behavior | Proposal only required a graphical window. | The game renders through a virtual 800x600 canvas with letterboxing logic, but the current build still opens a fixed-size window. | Keeps rendering stable and leaves room for future resizing support. |
+| Visual readability | Proposal focused on basic rendering. | Added thick outlines for sprites and text, plus ring overlays on obstacle gap edges. | Makes the goose, UI, and obstacle openings easier to read. |
+| Transition visuals | Proposal required an immortal transition message and countdown. | Transition also gives the goose a yellow immortal overlay and shows the next gravity value. | Reinforces the temporary safe state and communicates the stage change clearly. |
+| Stage size | Proposal suggested fixed stage obstacle counts. | Stage 1 has 5 obstacles, stage 2 has 6, and stage 3 onward has 7. | Adds progression while keeping stage length bounded. |
+| Transition timing | Proposal said transition starts after all stage obstacles are passed and no obstacles appear during it. | After the stage quota is passed, the remaining stage obstacles finish leaving the screen first; then the 3-second obstacle-free transition begins. | Prevents abrupt obstacle disappearance while still honoring a clear transition phase. |
+| Obstacle generation | Proposal suggested bounded random gaps and a max-shift style fairness rule. | The first obstacle of each stage uses the full legal gap range, then later gaps are biased to alternate screen halves with stage-dependent probability; spacing also increases with speed. | Produces readable variety and better pacing than purely local random shifts. |
+| Gravity tuning | Proposal required safe bounded random gravity. | Gravity uses a bounded range and stage-based percentage bands. | Keeps stage changes noticeable but still playable. |
+| Death and result flow | Proposal moved directly from failure to game-over screens. | Added a short falling death animation before showing `GameOver` or `NewHighScore`. | Gives failure states a clearer visual transition. |
+| High-score HUD | Proposal required home and game-over high-score displays. | During gameplay and pause, the HUD changes when the player beats the previous session best. | Gives immediate feedback when a run becomes a new record. |
 
 ---
 
-## 18. LLM Usage
+## 17. LLM Usage
 
 Large language models were used during development of this project.
 
@@ -516,7 +749,7 @@ The main difficulty with LLM assistance was that visual design suggestions somet
 
 ---
 
-## 19. License and Asset Notice
+## 18. License and Asset Notice
 
 All source code and assets included in this repository are intended for this course project.
 
@@ -524,7 +757,7 @@ The game is inspired by the general mechanics of Flappy Bird, but uses original 
 
 ---
 
-## 20. Author
+## 19. Author
 
 Name: `Bui Minh Hieu`
 
